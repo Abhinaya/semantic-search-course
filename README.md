@@ -1,9 +1,46 @@
-# 🔍 Semantic Search with Elasticsearch and SentenceTransformers
+# 🔍 7-Day Bootcamp: Product Search + RAG Q&A Application
 
-This project demonstrates how to build a vector search engine using:
-- Amazon product metadata
-- SentenceTransformers for embedding text
-- Elasticsearch for indexing and k-NN based vector search
+Build a production-ready semantic search and RAG Q&A system from scratch in 7 days.
+
+**🎯 What You'll Build:**
+- Day 1: ✅ Keyword Search (BM25) with FastAPI
+- Day 2: Synonyms & Fuzzy Search
+- Day 3: Semantic Search (Embeddings)
+- Day 4: Vector Search (kNN)
+- Day 5: Hybrid Search (BM25 + Vector)
+- Day 6: RAG Q&A with LLM
+- Day 7: Streamlit UI
+
+**🛠 Tech Stack:**
+- FastAPI for REST API
+- Elasticsearch for search & vector storage
+- SentenceTransformers for embeddings
+- LLM for RAG (OpenAI/Groq)
+- Docker for deployment
+
+---
+
+## 🚀 Quick Start (3 Commands)
+
+```bash
+# 1. Start all services (Elasticsearch + Kibana + FastAPI + Frontend)
+docker-compose up -d --build
+
+# 2. Index 1000 products (wait for services to be healthy first)
+docker exec product-search-api python index_products.py
+
+# 3. Access Search UI
+open http://localhost:3000
+```
+
+**That's it!** 🎉 Your complete search application is running!
+
+**🌐 Access Points:**
+- **🎨 Search UI:** http://localhost:3000
+- **📚 API Docs:** http://localhost:8000/docs
+- **📊 Kibana:** http://localhost:5601
+
+**📖 Detailed Setup:** See [DOCKER_SETUP.md](./DOCKER_SETUP.md) for complete Docker guide.
 
 ---
 
@@ -55,17 +92,32 @@ Make sure your Elasticsearch instance is running and accessible (e.g. at http://
 
 ## 🧠 Index Product Metadata to Elasticsearch
 
-To generate sentence embeddings and index product data into Elasticsearch:
+To index product data into Elasticsearch:
 
+**Option 1: Docker (Recommended)**
 ```bash
+docker exec product-search-api python index_products.py
+```
+
+**Option 2: Local with uv/poetry (with embeddings)**
+```bash
+# Using uv (includes embeddings for semantic search)
+uv run src/elacticsearch_demo/step1_index_products.py
+
+# Or using poetry
 poetry run python src/elacticsearch_demo/step1_index_products.py
 ```
 
-👉 This will:
-- Read the data CSV file
-- Generate vector embeddings using `all-MiniLM-L6-v2`
+👉 **Option 1** (Docker) will:
+- Read the data CSV file (1000 products)
 - Create an Elasticsearch index named `amazon_products`
-- Bulk index all records with their embeddings
+- Bulk index all records with title and description
+- Takes ~5-10 seconds
+
+👉 **Option 2** (Local script) will also:
+- Generate vector embeddings using `all-MiniLM-L6-v2`
+- Index with embeddings for semantic search
+- Takes ~2-3 minutes
 
 ---
 
@@ -73,10 +125,21 @@ poetry run python src/elacticsearch_demo/step1_index_products.py
 
 The `docker-compose.yml` includes:
 
-- **Elasticsearch 8.11.0**: Vector search engine
-- **Kibana 8.11.0**: Data visualization and management UI
+- **Elasticsearch 9.0.3**: Vector search engine (port 9200)
+- **Kibana 9.0.3**: Data visualization and management UI (port 5601)
+- **Product Search API**: FastAPI application (port 8000)
+- **Frontend UI**: Search interface with npx serve (port 3000)
 - **Persistent storage**: Data persists between container restarts
 - **Health checks**: Ensures services are ready before dependencies start
+- **Auto-restart**: Services restart automatically on failure
+
+### 🌐 Service URLs
+
+- **🎨 Search UI:** http://localhost:3000 (Start here!)
+- **Product Search API:** http://localhost:8000
+- **API Documentation:** http://localhost:8000/docs
+- **Elasticsearch:** http://localhost:9200
+- **Kibana:** http://localhost:5601
 
 ### Useful Docker Commands
 

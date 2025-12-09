@@ -49,6 +49,50 @@ services:
       timeout: 10s
       retries: 5
 
+  product-search-app:
+    build:
+      context: ./product-search-app
+      dockerfile: Dockerfile
+    container_name: product-search-api
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    environment:
+      - ELASTICSEARCH_URL=http://es01:9200
+      - ELASTICSEARCH_INDEX=amazon_products
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+      - DEFAULT_SEARCH_SIZE=10
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/data:ro  # Mount data directory for indexing (read-only)
+    networks:
+      - elastic
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./product-search-app/frontend
+      dockerfile: Dockerfile
+    container_name: product-search-frontend
+    ports:
+      - "3000:3000"
+    networks:
+      - elastic
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
 volumes:
   esdata01:
     driver: local
