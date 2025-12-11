@@ -55,6 +55,44 @@ class ElasticsearchClient:
         except Exception:
             return None
 
+    def keyword_search(self, query: str, size: int = 10):
+        """
+        Perform BM25 keyword search across title and description fields
+
+        Args:
+            query: Search query string
+            size: Number of results to return (default: 10)
+
+        Returns:
+            Dictionary containing:
+                - hits: List of search results
+                - total: Total number of matching documents
+                - took_ms: Time taken in milliseconds
+        """
+        try:
+            response = self.client.search(
+                index=self.index_name,
+                body={
+                    "query": {
+                        "multi_match": {
+                            "query": query,
+                            "fields": ["title^2", "description"],
+                            "type": "best_fields",
+                            "operator": "or"
+                        }
+                    },
+                    "size": size
+                }
+            )
+
+            return {
+                "hits": response["hits"]["hits"],
+                "total": response["hits"]["total"]["value"],
+                "took_ms": response["took"]
+            }
+        except Exception as e:
+            raise Exception(f"Keyword search failed: {str(e)}")
+
     def close(self):
         """Close Elasticsearch connection"""
         try:

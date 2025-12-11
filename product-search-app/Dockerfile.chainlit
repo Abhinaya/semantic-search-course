@@ -1,0 +1,25 @@
+# Chainlit Agent Dockerfile
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
+# Install uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+
+# Copy dependency files
+COPY pyproject.toml ./
+
+# Install only Chainlit and LangGraph dependencies
+RUN uv pip install --system langchain langchain-groq langgraph chainlit httpx python-dotenv
+
+# Copy application code
+COPY chainlit_app.py ./
+
+# Expose Chainlit port
+EXPOSE 8001
+
+# Run Chainlit
+CMD ["chainlit", "run", "chainlit_app.py", "--host", "0.0.0.0", "--port", "8001"]

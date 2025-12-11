@@ -11,6 +11,12 @@ dependencies = [
     "pydantic>=2.10.3",
     "pydantic-settings>=2.6.1",
     "python-dotenv>=1.0.1",
+    # Day 2: RAG + LangGraph dependencies
+    "langchain>=0.3.0",
+    "langchain-groq>=0.2.0",
+    "langgraph>=0.2.0",
+    "chainlit>=1.1.0",
+    "httpx>=0.28.1",
 ]
 
 [project.optional-dependencies]

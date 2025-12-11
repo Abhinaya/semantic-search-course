@@ -102,13 +102,28 @@ async def search_products(request: SearchRequest):
         )
 
     try:
+        # Perform keyword search using BM25
+        search_results = es_client.keyword_search(
+            query=request.query,
+            size=request.size
+        )
+
+        # Format results
         products = []
+        for hit in search_results["hits"]:
+            source = hit["_source"]
+            products.append({
+                "id": source.get("id"),
+                "title": source.get("title"),
+                "description": source.get("description"),
+                "score": hit["_score"]
+            })
 
         return SearchResponse(
             query=request.query,
-            total_hits=0,
+            total_hits=search_results["total"],
             results=products,
-            took_ms=0,
+            took_ms=search_results["took_ms"],
         )
 
     except Exception as e:
